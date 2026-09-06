@@ -1,0 +1,16 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.env/
+.envs/
+.mamba/
+*.ckpt
+*.pt
+/ckpts/
+/data/
+/results/
+/outputs/
+wandb/
+lightning_logs/
+.DS_Store

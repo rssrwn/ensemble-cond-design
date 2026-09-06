@@ -1,0 +1,180 @@
+# SMARTS definitions for pharmacophore features
+# Modified from https://github.com/coleygroup/shepherd-score/blob/main/shepherd_score/pharm_utils/smarts_features.fdef
+
+#
+# These features were adapted from SHEPHERD
+# Which also includes feature definitions from RDKit, Pharmer, as well as some of their own
+#
+
+# The key differences here from the definitions in SHEPHERD are:
+# 1. Removed Zn binder features
+# 2. Include hydrophobic features directly in SMARTS (they defined them separately)
+# 3. Removed aromatic atoms from hydrophobic since they will be assigned as aromatic anyway
+# 4. Removed halogen family — Br/I are included as hydrophobic, F/Cl are excluded (they are more polar)
+# 5. Added heteroatom neighbour exclusion on carbon hydrophobes (aligned with ProLIF)
+
+
+# *** Aromatic -- from SHEPHERD ***
+
+AtomType AromR4 [a;r4,!R1&r3]
+DefineFeature Arom4 [{AromR4}]1:[{AromR4}]:[{AromR4}]:[{AromR4}]:1
+ Family Aromatic
+ Weights 1,1,1,1
+EndFeature
+AtomType AromR5 [a;r5,!R1&r4,!R1&r3]
+DefineFeature Arom5 [{AromR5}]1:[{AromR5}]:[{AromR5}]:[{AromR5}]:[{AromR5}]:1
+ Family Aromatic
+ Weights 1,1,1,1,1
+EndFeature
+AtomType AromR6 [a;r6,!R1&r5,!R1&r4,!R1&r3]
+DefineFeature Arom6 [{AromR6}]1:[{AromR6}]:[{AromR6}]:[{AromR6}]:[{AromR6}]:[{AromR6}]:1
+ Family Aromatic
+ Weights 1,1,1,1,1,1
+EndFeature
+AtomType AromR7 [a;r7,!R1&r6,!R1&r5,!R1&r4,!R1&r3]
+DefineFeature Arom7 [{AromR7}]1:[{AromR7}]:[{AromR7}]:[{AromR7}]:[{AromR7}]:[{AromR7}]:[{AromR7}]:1
+ Family Aromatic
+ Weights 1,1,1,1,1,1,1
+EndFeature
+AtomType AromR8 [a;r8,!R1&r7,!R1&r6,!R1&r5,!R1&r4,!R1&r3]
+DefineFeature Arom8 [{AromR8}]1:[{AromR8}]:[{AromR8}]:[{AromR8}]:[{AromR8}]:[{AromR8}]:[{AromR8}]:[{AromR8}]:1
+ Family Aromatic
+ Weights 1,1,1,1,1,1,1,1
+EndFeature
+
+
+# *** HBD ***
+
+DefineFeature N_HBD [#7!H0&!$(N-[SX4](=O)(=O)[CX4](F)(F)F)]
+  Family Donor
+  Weights 1
+EndFeature
+DefineFeature O_HBD [#8!H0&!$([OH][C,S,P]=O)]
+  Family Donor
+  Weights 1
+EndFeature
+DefineFeature S_HBD [#16!H0]
+  Family Donor
+  Weights 1
+EndFeature
+# from rdkit
+DefineFeature ChalcDonor [O,S;H1;+0]
+  Family Donor
+  Weights 1
+EndFeature
+
+
+# *** HBA ***
+
+AtomType N_HBA [#7&!$([nX3])&!$([NX3]-*=[!#6])&!$([NX3]-[a])&!$([NX4])&!$(N=C([C,N])N)]
+AtomType O_HBA [$([O])&!$([OX2](C)C=O)&!$(*(~a)~a)]
+AtomType ChalcAcceptor [O;H0;v2;!$(O=N-*)] # removes thioether and nitro oxygen
+Atomtype ChalcAcceptor [O;-;!$(*-N=O)]
+Atomtype ChalcAcceptor [o;+0] # Removed aromatic sulfur from ChalcAcceptor definition
+AtomType Hydroxyl [O;H1;v2] # Hydroxyls and acids
+DefineFeature HBA [{Hydroxyl},{ChalcAcceptor},{O_HBA},{N_HBA}]
+  Family Acceptor
+  Weights 1
+EndFeature
+
+
+# *** Cations // Positive Ionizable ***
+
+DefineFeature N_positive [$([NX3+]([CX4])([CX4,#1])[CX4,#1])&!$([NX3]-*=[!#6])]
+  Family Cation
+  Weights 1
+EndFeature
+DefineFeature amidino_positive1 [CX3](=[N+])(-N)[!N]
+  Family Cation
+  Weights 1,1,1,1
+EndFeature
+DefineFeature amidino_positive2 [CX3](=N)(-[N+])[!N]
+  Family Cation
+  Weights 1,1,1,1
+EndFeature
+DefineFeature guanidino_positive1 [N+]=[CX3](N)-N
+  Family Cation
+  Weights 1,1,1,1
+EndFeature
+DefineFeature guanidino_positive2 N=[CX3+](N)-N
+  Family Cation
+  Weights 1,1,1,1
+EndFeature
+DefineFeature guanidino_positive3 N=[CX3]([N+])-N
+  Family Cation
+  Weights 1,1,1,1
+EndFeature
+DefineFeature charged_positive [$([+,+2,+3])&!$(*[-,-2,-3])]
+  Family Cation
+  Weights 1
+EndFeature
+
+
+# *** Anion // Negative ionizable ***
+# Adjusted to be anion rather than negative *ionizable*
+
+DefineFeature tetrazole_negative c1nn[nH1]n1
+  Family Anion
+  Weights 1,1,1,1,1
+EndFeature
+# DefineFeature SP_v4_negative [$([SX4,PX4](=O)(=O)[O-,OH])](=O)(=O)[O-,OH]
+DefineFeature SP_v4_negative [$([SX4,PX4](=O)(=O)[O-])](=O)(=O)[O-]
+  Family Anion
+  Weights 1,1,1,1
+EndFeature
+# DefineFeature CSP_v3_negative [$([CX3,SX3,PX3](=O)[O-,OH])](=O)[O-,OH]
+DefineFeature CSP_v3_negative [$([CX3,SX3,PX3](=O)[O-])](=O)[O-]
+  Family Anion
+  Weights 1,1,1
+EndFeature
+DefineFeature charged_negative [$([-,-2,-3])&!$(*[+,+2,+3])]
+  Family Anion
+  Weights 1
+EndFeature
+
+
+# *** Hydrophobic ***
+# Aromatic atoms are excluded — they have their own Aromatic family.
+# Halogens F/Cl are excluded (polar). Br/I are included as standalone hydrophobes (as in ProLIF).
+# Carbon atoms bonded to N, O, or F are excluded from the simpler patterns (aligned with ProLIF).
+
+# Isolated terminal hydrophobic carbon not bonded to another hydrophobic group
+DefineFeature hyd_1 [$([CH3X4,CH2X3,CH1X2])&!$(**[CH3X4,CH2X3,CH1X2])&!$([#6]~[#7,#8,#9])]
+  Family Hydrophobe
+  Weights 1
+EndFeature
+# Center with exactly two hydrophobic substituents
+DefineFeature hyd_2a [$(*([CH3X4,CH2X3,CH1X2])[CH3X4,CH2X3,CH1X2])&!$(*([CH3X4,CH2X3,CH1X2])([CH3X4,CH2X3,CH1X2])[CH3X4,CH2X3,CH1X2])]([CH3X4,CH2X3,CH1X2])[CH3X4,CH2X3,CH1X2]
+  Family Hydrophobe
+  Weights 1,1,1
+EndFeature
+# Center with three hydrophobic substituents (tert-butyl-like)
+DefineFeature hyd_2b *([CH3X4,CH2X3,CH1X2])([CH3X4,CH2X3,CH1X2])[CH3X4,CH2X3,CH1X2]
+  Family Hydrophobe
+  Weights 1,1,1,1
+EndFeature
+# Two-atom hydrophobic chain
+DefineFeature hyd_3 [CH2X4,CH1X3,CH0X2;!$([#6]~[#7,#8,#9])]~[CH3X4,CH2X3,CH1X2;!$([#6]~[#7,#8,#9])]
+  Family Hydrophobe
+  Weights 1,1
+EndFeature
+# Three-atom hydrophobic chain
+DefineFeature hyd_4 [$([CH2X4,CH1X3,CH0X2]~[$([!#1]);!$([CH2X4,CH1X3,CH0X2])])]~[CH2X4,CH1X3,CH0X2]~[CH2X4,CH1X3,CH0X2]
+  Family Hydrophobe
+  Weights 1,1,1
+EndFeature
+# Four-atom hydrophobic chain
+DefineFeature hyd_5 [$([CH2X4,CH1X3,CH0X2]~[CH2X4,CH1X3,CH0X2]~[$([CH2X4,CH1X3,CH0X2]~[$([!#1]);!$([CH2X4,CH1X3,CH0X2])])])]~[CH2X4,CH1X3,CH0X2]~[CH2X4,CH1X3,CH0X2]~[CH2X4,CH1X3,CH0X2]
+  Family Hydrophobe
+  Weights 1,1,1,1
+EndFeature
+# Thioether sulfur (bonded only to carbons)
+DefineFeature S_hyd [$([S]~[#6])&!$(S~[!#6])]
+  Family Hydrophobe
+  Weights 1
+EndFeature
+# Bromine and iodine bonded to carbon (heavier halogens are hydrophobic)
+DefineFeature halogen_hyd [Br,I;$(*-[#6])]
+  Family Hydrophobe
+  Weights 1
+EndFeature

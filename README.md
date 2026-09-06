@@ -25,15 +25,32 @@ W&B logging is opt-in; training otherwise logs locally. A GPU is recommended for
 full training and large evaluations. Sampling selects CUDA, then MPS, then CPU;
 use `--device cpu` to choose explicitly.
 
+## Pretrained model and datasets
+
+The pretrained model and processed datasets are available on
+[Zenodo](https://zenodo.org/records/22485204).
+
+| File | Contents |
+| --- | --- |
+| `enscond.ckpt` | Pretrained molecular generation model, including the protein-pocket encoder. |
+| `geomdrugs-enscond.tar.gz` | Processed GEOM-Drugs conformer ensembles, including conformer weights and training, validation, and test split assignments. |
+| `spindr-enscond.tar.gz` | Processed SPINDR protein–ligand complexes and interaction annotations for pocket-conditioned training and evaluation. |
+| `multi-cond-test.tar.gz` | Multi-condition evaluation data, including paired molecular shape targets and associated benchmark metadata. |
+
+Download only the files needed for your workflow: sampling from the pretrained
+model requires `enscond.ckpt`; dataset-based evaluations and training require the
+corresponding data archives. Extract the archives locally and pass their paths to
+the scripts as described below and in the evaluation documentation.
+
 ## Load a model and sample
 
-Supply a Lightning `.ckpt` produced by this model architecture. Our trained
-model is available at ...
+Use `enscond.ckpt` from the Zenodo release above, or a Lightning `.ckpt` trained
+with this model architecture.
 
 Unconditional sampling:
 
 ```bash
-python -m enscondflow.sample --ckpt_path /path/to/model.ckpt \
+python -m enscondflow.sample --ckpt_path /path/to/enscond.ckpt \
   --n_mols 16 --batch_size 16 --output outputs/unconditional.sdf
 ```
 
@@ -41,7 +58,7 @@ Condition on a 3D ligand's shape and pharmacophore profile:
 
 ```bash
 python examples/make_reference.py --output outputs/reference.sdf
-python -m enscondflow.sample --ckpt_path /path/to/model.ckpt \
+python -m enscondflow.sample --ckpt_path /path/to/enscond.ckpt \
   --reference outputs/reference.sdf --condition profile \
   --cfg_gamma 1.0 --n_mols 16 --output outputs/conditioned.sdf
 ```
@@ -62,7 +79,7 @@ The same loader is available in Python:
 ```python
 from enscondflow.sample import load_pretrained, sample_molecules
 
-model = load_pretrained("/path/to/model.ckpt", device="cpu")
+model = load_pretrained("/path/to/enscond.ckpt", device="cpu")
 molecules = sample_molecules(model, n_mols=4, batch_size=4)
 ```
 
